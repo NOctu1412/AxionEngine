@@ -10,8 +10,7 @@ fun main() {
 
     println(
         axionEngine.callExport("test",
-            stringArg("Salut !"),
-            intArg(42),
+            doubleArg(2.5)
         )[0]
     );
 }

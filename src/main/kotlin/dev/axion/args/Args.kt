@@ -16,6 +16,14 @@ fun longArg(value: Long): LongArgument {
     return LongArgument(value);
 }
 
+fun floatArg(value: Float): FloatArgument {
+    return FloatArgument(value);
+}
+
+fun doubleArg(value: Double): DoubleArgument {
+    return DoubleArgument(value);
+}
+
 fun stringArg(value: String): StringArgument {
     return StringArgument(value);
 }

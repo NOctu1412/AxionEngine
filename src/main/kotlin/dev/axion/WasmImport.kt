@@ -23,5 +23,4 @@ class WasmImport
     override fun getRet(): MutableList<ValType> {
         return returns.toMutableList();
     }
-
 }

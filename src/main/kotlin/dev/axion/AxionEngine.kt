@@ -44,11 +44,11 @@ class AxionEngine constructor(wasmBinary: ByteArray, imports: List<WasmImport>) 
         return wasmerInstance.execute(name, args);
     }
 
-    fun callExport(name: String, argumentType: ArgumentType, vararg args: Argument): Argument {
-        return callExport(name, listOf(argumentType), *args)[0];
+    fun callExport(name: String, returnType: ArgumentType, vararg args: Argument): Argument {
+        return callExport(name, listOf(returnType), *args)[0];
     }
 
-    fun callExport(name: String, argumentType: List<ArgumentType>, vararg args: Argument): List<Argument> {
+    fun callExport(name: String, returnsType: List<ArgumentType>, vararg args: Argument): List<Argument> {
         //build long list from arguments//
         val longArgs = LongArray(args.size);
         for (i in args.indices) {
@@ -65,7 +65,7 @@ class AxionEngine constructor(wasmBinary: ByteArray, imports: List<WasmImport>) 
         //build return values//
         val returnValues = ArrayList<Argument>();
         for (i in result.indices) {
-            returnValues.add(valueFromLong(this, argumentType[i], result[i]));
+            returnValues.add(valueFromLong(this, returnsType[i], result[i]));
         }
 
         return returnValues;

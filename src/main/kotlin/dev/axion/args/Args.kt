@@ -50,10 +50,12 @@ fun valueFromLong(axionEngine: AxionEngine, argumentType: ArgumentType, value: L
             return DoubleArgument(value.toDouble());
         }
         ArgumentType.STRING -> {
+            //getting the string//
             val length = axionEngine.getStringObjectLength(value);
             val buffer = axionEngine.getStringObjectBuffer(value);
             val stringByteBuffer = axionEngine.getDefaultMemory().read(buffer.toInt(), length.toInt());
             val string = String(stringByteBuffer);
+            //freeing the string//
             axionEngine.free(buffer, length);
             axionEngine.destroyStringObject(value);
             return StringArgument(string);

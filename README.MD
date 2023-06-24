@@ -56,6 +56,7 @@ There are different types of arguments that can be passed to the exported functi
 > `byteArg`: A byte argument.  
 > `shortArg`: A short argument.  
 > `booleanArg`: A boolean argument.
+> `charArg`: A character argument.
 
 ## Closing the `AxionEngine` Object
 When you're done using the `AxionEngine` object, you should close it. This will free up any resources that were allocated by the WebAssembly module. Here's an example of how to close an `AxionEngine` object:

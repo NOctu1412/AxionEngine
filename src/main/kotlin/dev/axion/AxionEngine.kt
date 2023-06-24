@@ -8,11 +8,16 @@ import dev.axion.args.Argument
 import dev.axion.args.ArgumentType
 import valueFromLong
 
-class AxionEngine constructor(wasmBinary: ByteArray, imports: List<WasmImport>) {
+private var nativesInitialized = false;
+
+class AxionEngine(wasmBinary: ByteArray, imports: List<WasmImport>) {
     private var wasmerInstance: Instance;
 
     init {
-        Natives.initialize(0x500);
+        if(!nativesInitialized) {
+            nativesInitialized = true;
+            Natives.initialize(0x500); //number of axion engines that can run simultaneously//
+        }
         wasmerInstance = Instance.create(wasmBinary, Options.empty(), imports);
     }
 
@@ -76,6 +81,6 @@ class AxionEngine constructor(wasmBinary: ByteArray, imports: List<WasmImport>) 
     }
 
     fun close() {
-        wasmerInstance?.close();
+        wasmerInstance.close();
     }
 }

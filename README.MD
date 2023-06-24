@@ -55,7 +55,7 @@ There are different types of arguments that can be passed to the exported functi
 > `longArg`: A long argument.  
 > `byteArg`: A byte argument.  
 > `shortArg`: A short argument.  
-> `booleanArg`: A boolean argument.
+> `booleanArg`: A boolean argument.  
 > `charArg`: A character argument.
 
 ## Closing the `AxionEngine` Object

@@ -2,9 +2,9 @@ package dev.axion.args
 
 import dev.axion.AxionEngine
 
-class DoubleArgument(private val value: Double) : Argument() {
+class DoubleArgument(private val double: Double) : Argument(double) {
     override fun toLong(axionEngine: AxionEngine): Long {
-        return value.toBits();
+        return double.toBits();
     }
 
     override fun cleanMemory(axionEngine: AxionEngine) {

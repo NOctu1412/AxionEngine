@@ -2,9 +2,9 @@ package dev.axion.args
 
 import dev.axion.AxionEngine
 
-class LongArgument(private val value: Long) : Argument() {
+class LongArgument(private val long: Long) : Argument(long) {
     override fun toLong(axionEngine: AxionEngine): Long {
-        return value;
+        return long;
     }
 
     override fun cleanMemory(axionEngine: AxionEngine) {

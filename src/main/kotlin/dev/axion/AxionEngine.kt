@@ -5,6 +5,8 @@ import com.github.salpadding.wasmer.Memory
 import com.github.salpadding.wasmer.Natives
 import com.github.salpadding.wasmer.Options
 import dev.axion.args.Argument
+import dev.axion.args.ArgumentType
+import valueFromLong
 
 class AxionEngine constructor(wasmBinary: ByteArray, imports: List<WasmImport>) {
     private var wasmerInstance: Instance;
@@ -22,6 +24,14 @@ class AxionEngine constructor(wasmBinary: ByteArray, imports: List<WasmImport>) 
         return callExport("create_string", longArrayOf(ptr, size))[0];
     }
 
+    fun getStringObjectLength(ptr: Long): Long {
+        return callExport("get_string_length", longArrayOf(ptr))[0];
+    }
+
+    fun getStringObjectBuffer(ptr: Long): Long {
+        return callExport("get_string_buffer", longArrayOf(ptr))[0];
+    }
+
     fun free(ptr: Long, size: Long) {
         callExport("free_rust", longArrayOf(ptr, size));
     }
@@ -30,11 +40,15 @@ class AxionEngine constructor(wasmBinary: ByteArray, imports: List<WasmImport>) 
         callExport("destroy_string", longArrayOf(ptr));
     }
 
-    fun callExport(name: String, args: LongArray): LongArray {
+    private fun callExport(name: String, args: LongArray): LongArray {
         return wasmerInstance.execute(name, args);
     }
 
-    fun callExport(name: String, vararg args: Argument): LongArray {
+    fun callExport(name: String, argumentType: ArgumentType, vararg args: Argument): Argument {
+        return callExport(name, listOf(argumentType), *args)[0];
+    }
+
+    fun callExport(name: String, argumentType: List<ArgumentType>, vararg args: Argument): List<Argument> {
         //build long list from arguments//
         val longArgs = LongArray(args.size);
         for (i in args.indices) {
@@ -48,7 +62,13 @@ class AxionEngine constructor(wasmBinary: ByteArray, imports: List<WasmImport>) 
             args[i].cleanMemory(this);
         }
 
-        return result;
+        //build return values//
+        val returnValues = ArrayList<Argument>();
+        for (i in result.indices) {
+            returnValues.add(valueFromLong(this, argumentType[i], result[i]));
+        }
+
+        return returnValues;
     }
 
     fun getDefaultMemory(): Memory {

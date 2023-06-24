@@ -2,7 +2,7 @@ package dev.axion.args
 
 import dev.axion.AxionEngine
 
-class ByteArgument(private val byte: Byte) : Argument() {
+class ByteArgument(private val byte: Byte) : Argument(byte) {
     override fun toLong(axionEngine: AxionEngine): Long {
         return byte.toLong();
     }

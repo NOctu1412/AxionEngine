@@ -1,4 +1,5 @@
 import dev.axion.AxionEngine
+import dev.axion.args.ArgumentType
 import java.io.File
 
 fun main() {
@@ -9,8 +10,8 @@ fun main() {
     val axionEngine = AxionEngine(scriptBytes, listOf());
 
     println(
-        axionEngine.callExport("test",
+        axionEngine.callExport("test", ArgumentType.STRING,
             doubleArg(2.5)
-        )[0]
+        ).value
     );
 }

@@ -2,9 +2,9 @@ package dev.axion.args
 
 import dev.axion.AxionEngine
 
-class FloatArgument(private val value: Float) : Argument() {
+class FloatArgument(private val float: Float) : Argument(float) {
     override fun toLong(axionEngine: AxionEngine): Long {
-        return value.toBits().toLong();
+        return float.toBits().toLong();
     }
 
     override fun cleanMemory(axionEngine: AxionEngine) {

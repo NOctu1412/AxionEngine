@@ -1,3 +1,4 @@
+import dev.axion.AxionEngine
 import dev.axion.args.*
 
 fun byteArg(value: Byte): ByteArgument {
@@ -26,4 +27,36 @@ fun doubleArg(value: Double): DoubleArgument {
 
 fun stringArg(value: String): StringArgument {
     return StringArgument(value);
+}
+
+fun valueFromLong(axionEngine: AxionEngine, argumentType: ArgumentType, value: Long): Argument {
+    when(argumentType) {
+        ArgumentType.BYTE -> {
+            return ByteArgument(value.toByte());
+        }
+        ArgumentType.SHORT -> {
+            return ShortArgument(value.toShort());
+        }
+        ArgumentType.INTEGER -> {
+            return IntegerArgument(value.toInt());
+        }
+        ArgumentType.LONG -> {
+            return LongArgument(value);
+        }
+        ArgumentType.FLOAT -> {
+            return FloatArgument(value.toFloat());
+        }
+        ArgumentType.DOUBLE -> {
+            return DoubleArgument(value.toDouble());
+        }
+        ArgumentType.STRING -> {
+            val length = axionEngine.getStringObjectLength(value);
+            val buffer = axionEngine.getStringObjectBuffer(value);
+            val stringByteBuffer = axionEngine.getDefaultMemory().read(buffer.toInt(), length.toInt());
+            val string = String(stringByteBuffer);
+            axionEngine.free(buffer, length);
+            axionEngine.destroyStringObject(value);
+            return StringArgument(string);
+        }
+    }
 }

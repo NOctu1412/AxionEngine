@@ -11,7 +11,7 @@ fun main() {
 
     println(
         axionEngine.callExport("test", ArgumentType.STRING,
-            doubleArg(2.5)
+            booleanArg(false)
         ).value
     );
 }

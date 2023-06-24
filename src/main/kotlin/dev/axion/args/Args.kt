@@ -4,6 +4,13 @@ import dev.axion.args.*
 fun byteArg(value: Byte): ByteArgument {
     return ByteArgument(value);
 }
+fun charArg(value: Char): CharArgument {
+    return CharArgument(value);
+}
+
+fun booleanArg(value: Boolean): BooleanArgument {
+    return BooleanArgument(value);
+}
 
 fun shortArg(value: Short): ShortArgument {
     return ShortArgument(value);
@@ -33,6 +40,12 @@ fun valueFromLong(axionEngine: AxionEngine, argumentType: ArgumentType, value: L
     when(argumentType) {
         ArgumentType.BYTE -> {
             return ByteArgument(value.toByte());
+        }
+        ArgumentType.CHAR -> {
+            return CharArgument(value.toInt().toChar());
+        }
+        ArgumentType.BOOLEAN -> {
+            return BooleanArgument(value == 1L);
         }
         ArgumentType.SHORT -> {
             return ShortArgument(value.toShort());

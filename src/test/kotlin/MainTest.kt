@@ -1,5 +1,5 @@
 import dev.axion.AxionEngine
-import dev.axion.args.ArgumentType
+import dev.axion.types.*
 import java.io.File
 
 fun main() {
@@ -10,8 +10,7 @@ fun main() {
     val axionEngine = AxionEngine(scriptBytes, listOf());
 
     println(
-        axionEngine.callExport("test", ArgumentType.STRING,
-            booleanArg(false)
-        ).value
+        (axionEngine.callExport("test", ArgumentType.POINTER
+        ) as PointerWasmType).get<String>()
     );
 }

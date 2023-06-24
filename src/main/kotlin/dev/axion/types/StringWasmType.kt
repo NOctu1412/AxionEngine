@@ -1,8 +1,10 @@
-package dev.axion.args
+package dev.axion.types
 
 import dev.axion.AxionEngine
 
-class StringArgument(private val string: String) : Argument(string) {
+//used for String object in rust
+//if you want to get a CString, use the PointerWasmType.getAsString() method
+class StringWasmType(private val string: String) : WasmType(string) {
     private var stringPointer: Long = 0;       //*mut u8
     private var stringObjectPointer: Long = 0; //String type in rust
 

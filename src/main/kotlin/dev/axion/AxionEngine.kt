@@ -4,9 +4,9 @@ import com.github.salpadding.wasmer.Instance
 import com.github.salpadding.wasmer.Memory
 import com.github.salpadding.wasmer.Natives
 import com.github.salpadding.wasmer.Options
-import dev.axion.args.Argument
-import dev.axion.args.ArgumentType
-import valueFromLong
+import dev.axion.types.WasmType
+import dev.axion.types.ArgumentType
+import dev.axion.types.valueFromLong
 
 private var nativesInitialized = false;
 
@@ -49,11 +49,11 @@ class AxionEngine(wasmBinary: ByteArray, imports: List<WasmImport>) {
         return wasmerInstance.execute(name, args);
     }
 
-    fun callExport(name: String, returnType: ArgumentType, vararg args: Argument): Argument {
+    fun callExport(name: String, returnType: ArgumentType, vararg args: WasmType): WasmType {
         return callExport(name, listOf(returnType), *args)[0];
     }
 
-    fun callExport(name: String, returnsType: List<ArgumentType>, vararg args: Argument): List<Argument> {
+    fun callExport(name: String, returnsType: List<ArgumentType>, vararg args: WasmType): List<WasmType> {
         //build long list from arguments//
         val longArgs = LongArray(args.size);
         for (i in args.indices) {
@@ -68,7 +68,7 @@ class AxionEngine(wasmBinary: ByteArray, imports: List<WasmImport>) {
         }
 
         //build return values//
-        val returnValues = ArrayList<Argument>();
+        val returnValues = ArrayList<WasmType>();
         for (i in result.indices) {
             returnValues.add(valueFromLong(this, returnsType[i], result[i]));
         }
@@ -77,7 +77,11 @@ class AxionEngine(wasmBinary: ByteArray, imports: List<WasmImport>) {
     }
 
     fun getDefaultMemory(): Memory {
-        return wasmerInstance.getMemory("memory");
+        return getMemory("memory");
+    }
+
+    fun getMemory(name: String): Memory {
+        return wasmerInstance.getMemory(name);
     }
 
     fun close() {

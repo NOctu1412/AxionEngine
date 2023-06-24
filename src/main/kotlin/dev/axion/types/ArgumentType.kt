@@ -1,4 +1,4 @@
-package dev.axion.args
+package dev.axion.types
 
 enum class ArgumentType {
     BYTE,
@@ -9,5 +9,6 @@ enum class ArgumentType {
     LONG,
     FLOAT,
     DOUBLE,
-    STRING
+    STRING,
+    POINTER,
 }

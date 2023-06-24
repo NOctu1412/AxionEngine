@@ -1,10 +1,10 @@
-package dev.axion.args
+package dev.axion.types
 
 import dev.axion.AxionEngine
 
-class LongArgument(private val long: Long) : Argument(long) {
+class ByteWasmType(private val byte: Byte) : WasmType(byte) {
     override fun toLong(axionEngine: AxionEngine): Long {
-        return long;
+        return byte.toLong();
     }
 
     override fun cleanMemory(axionEngine: AxionEngine) {

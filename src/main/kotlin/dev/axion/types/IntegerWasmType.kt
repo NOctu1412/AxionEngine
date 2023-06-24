@@ -1,13 +1,13 @@
-package dev.axion.args
+package dev.axion.types
 
 import dev.axion.AxionEngine
 
-class DoubleArgument(private val double: Double) : Argument(double) {
+class IntegerWasmType(private val int: Int) : WasmType(int) {
     override fun toLong(axionEngine: AxionEngine): Long {
-        return double.toBits();
+        return int.toLong();
     }
 
     override fun cleanMemory(axionEngine: AxionEngine) {
-        //nothing to-do//
+        //do nothing//
     }
 }

@@ -1,10 +1,10 @@
-package dev.axion.args
+package dev.axion.types
 
 import dev.axion.AxionEngine
 
-class IntegerArgument(private val int: Int) : Argument(int) {
+class BooleanWasmType(private val boolean: Boolean) : WasmType(boolean) {
     override fun toLong(axionEngine: AxionEngine): Long {
-        return int.toLong();
+        return if(boolean) 1L else 0L;
     }
 
     override fun cleanMemory(axionEngine: AxionEngine) {

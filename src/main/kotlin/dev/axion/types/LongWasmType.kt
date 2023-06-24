@@ -1,13 +1,13 @@
-package dev.axion.args
+package dev.axion.types
 
 import dev.axion.AxionEngine
 
-class FloatArgument(private val float: Float) : Argument(float) {
+class LongWasmType(private val long: Long) : WasmType(long) {
     override fun toLong(axionEngine: AxionEngine): Long {
-        return float.toBits().toLong();
+        return long;
     }
 
     override fun cleanMemory(axionEngine: AxionEngine) {
-        //nothing to-do//
+        //do nothing//
     }
 }

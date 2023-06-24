@@ -58,11 +58,7 @@ class PointerWasmType(val axionEngine: AxionEngine, val ptr: Long = -1, val byte
         val length = axionEngine.getStringObjectLength(ptr);
         val buffer = axionEngine.getStringObjectBuffer(ptr);
         val stringByteBuffer = axionEngine.getDefaultMemory().read(buffer.toInt(), length.toInt());
-        val string = String(stringByteBuffer);
-        //freeing the string//
-        axionEngine.free(buffer, length);
-        axionEngine.destroyStringObject(ptr);
-        return StringWasmType(string).value as String;
+        return String(stringByteBuffer);
     }
 
     inline fun <reified T> get(): T {

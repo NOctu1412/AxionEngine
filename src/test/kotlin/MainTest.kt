@@ -1,8 +1,5 @@
 import dev.axion.AxionEngine
-import dev.axion.extension.toCStringWasmType
-import dev.axion.extension.toWasmType
 import dev.axion.types.*
-import dev.axion.types.impl.CStringWasmType
 import dev.axion.types.impl.PointerWasmType
 import dev.axion.types.impl.StringWasmType
 import java.io.File

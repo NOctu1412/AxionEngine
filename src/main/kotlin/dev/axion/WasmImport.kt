@@ -31,6 +31,8 @@ open class WasmImport(
 
         val result = exec(axionEngine, ins, argsList) ?: return longArrayOf()
 
+        if(returnType == EnumWasmType.VOID) return longArrayOf()
+
         return longArrayOf(result.toLong(axionEngine))
     }
 
@@ -43,6 +45,7 @@ open class WasmImport(
     }
 
     override fun getRet(): List<ValType> {
+        if(returnType == EnumWasmType.VOID) return emptyList()
         return listOf(returnType.toValType())
     }
 }

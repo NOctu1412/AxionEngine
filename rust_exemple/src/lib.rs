@@ -11,10 +11,11 @@ pub struct TestStructure {
 }
 
 extern "C" {
-    pub fn test_import(str: *mut String, a: i32, b: i32) -> i32;
+    pub fn kotlin_print(str: *mut String);
 }
 
 #[no_mangle]
-pub unsafe fn test(x: *mut TestStructure) -> i32 {
-    test_import((*x).name, 32, 65)
+pub unsafe fn test(x: [i64; 4]) -> i64 {
+    kotlin_print(into_mut_ptr(String::from("Hello from Rust !")));
+    x[0] + x[1] + x[2] + x[3]
 }

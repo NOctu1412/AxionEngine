@@ -29,6 +29,20 @@ class PointerWasmType(
     private val intPtr: Int = ptr.toInt()
 
     companion object {
+        inline fun <reified C: Any> allocateArray(engine: AxionEngine, array: Array<C>, autoFree: Boolean = true): PointerWasmType {
+            if(array.isEmpty()) throw IllegalArgumentException("Array cannot be empty")
+
+            val result = allocatePointerA(
+                engine = engine,
+                size = array.size.toLong() * array[0]::class.java.getWasmTypeSize().toLong(),
+                autoFree = autoFree
+            )
+            array.forEachIndexed { index, value ->
+                result.writeArrayElement(value, index)
+            }
+            return result
+        }
+
         fun <C: Any> allocateStructurePointer(engine: AxionEngine, structure: C, autoFree: Boolean = true): PointerWasmType {
             return getPointerFromStructure(engine, structure, autoFree = autoFree)
         }

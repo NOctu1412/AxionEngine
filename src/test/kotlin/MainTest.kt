@@ -12,13 +12,9 @@ fun main() {
     ))
 
     //TEST 1//
-    val structure = TestStructure("John", 20, 1.8F)
-    println("Base structure: $structure")
-
-    val structurePointer = PointerWasmType.allocateStructurePointer(engine, structure)
-    val result = engine.callExport("test", EnumWasmType.INTEGER,
-        structurePointer
-    ) as IntegerWasmType
+    val result = engine.callExport("test", EnumWasmType.LONG,
+        PointerWasmType.allocateArray(engine, arrayOf(1L, 2L, 3L, 4L))
+    ) as LongWasmType
 
     println(result.value)
 

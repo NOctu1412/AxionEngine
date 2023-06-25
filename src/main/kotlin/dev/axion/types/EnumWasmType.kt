@@ -1,6 +1,6 @@
 package dev.axion.types
 
-enum class WasmTypes {
+enum class EnumWasmType {
     BYTE,
     CHAR,
     BOOLEAN,

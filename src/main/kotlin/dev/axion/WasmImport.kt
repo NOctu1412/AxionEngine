@@ -11,7 +11,7 @@ open class WasmImport(
     private val name: String,
     private val returnType: EnumWasmType,
     private val parameterTypes: List<EnumWasmType>,
-    val exec: (Instance, List<WasmType>) -> WasmType?,
+    val exec: (AxionEngine, Instance, List<WasmType>) -> WasmType?,
 ) : HostFunction {
     private lateinit var axionEngine: AxionEngine
 
@@ -29,7 +29,7 @@ open class WasmImport(
             argsList.add(arg.toWasmType(axionEngine, parameterTypes[index]))
         }
 
-        val result = exec(ins, argsList) ?: return longArrayOf()
+        val result = exec(axionEngine, ins, argsList) ?: return longArrayOf()
 
         return longArrayOf(result.toLong(axionEngine))
     }

@@ -43,11 +43,56 @@ fun bytesToLong(bytes: ByteArray, byteOrder: ByteOrder): Long {
 }
 
 fun bytesToFloat(bytes: ByteArray, byteOrder: ByteOrder): Float {
-    return ByteBuffer.wrap(bytes).order(byteOrder).getFloat()
+    return Float.fromBits(bytesToInt(bytes, byteOrder))
 }
 
 fun bytesToDouble(bytes: ByteArray, byteOrder: ByteOrder): Double {
-    return ByteBuffer.wrap(bytes).order(byteOrder).getDouble()
+    return Double.fromBits(bytesToLong(bytes, byteOrder))
+}
+
+fun shortToBytes(value: Short, byteOrder: ByteOrder): ByteArray {
+    val bytes = ByteArray(2)
+    val high = ((value.toInt() shr 8) and 0xFF).toByte()
+    val low = (value.toInt() and 0xFF).toByte()
+
+    when (byteOrder) {
+        ByteOrder.BIG_ENDIAN -> {
+            bytes[0] = high
+            bytes[1] = low
+        }
+        ByteOrder.LITTLE_ENDIAN -> {
+            bytes[0] = low
+            bytes[1] = high
+        }
+    }
+
+    return bytes
+}
+
+fun intToBytes(value: Int, byteOrder: ByteOrder): ByteArray {
+    val bytes = ByteArray(4)
+    val buffer = ByteBuffer.allocate(4).order(byteOrder)
+    buffer.putInt(value)
+    buffer.flip();
+    buffer.get(bytes)
+    return bytes
+}
+
+fun longToBytes(value: Long, byteOrder: ByteOrder): ByteArray {
+    val bytes = ByteArray(8)
+    val buffer = ByteBuffer.allocate(8).order(byteOrder)
+    buffer.putLong(value)
+    buffer.flip();
+    buffer.get(bytes)
+    return bytes
+}
+
+fun floatToBytes(value: Float, byteOrder: ByteOrder): ByteArray {
+    return intToBytes(value.toRawBits(), byteOrder)
+}
+
+fun doubleToBytes(value: Double, byteOrder: ByteOrder): ByteArray {
+    return longToBytes(value.toRawBits(), byteOrder)
 }
 
 inline fun <reified T> getTypeSize(): Int {

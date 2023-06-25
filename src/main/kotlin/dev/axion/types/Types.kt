@@ -38,8 +38,12 @@ fun stringType(value: String): StringWasmType {
     return StringWasmType(value);
 }
 
-fun pointerType(axionEngine: AxionEngine, value: Long, byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN): PointerWasmType {
+fun pointerTypeFromPointerAddress(axionEngine: AxionEngine, value: Long, byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN): PointerWasmType {
     return PointerWasmType(axionEngine, value, byteOrder);
+}
+
+fun allocPointerType(axionEngine: AxionEngine, size: Long, byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN): PointerWasmType {
+    return PointerWasmType.allocatePointer(axionEngine, size, byteOrder);
 }
 
 fun valueFromLong(axionEngine: AxionEngine, argumentType: WasmTypes, value: Long): WasmType {

@@ -48,17 +48,17 @@ In the above example, we call the exported function named "test" with a double a
 ## Different types of types you can create
 There are different types of arguments that can be passed to the exported function. Here's a list of them:
 
-> `stringType(String): A string type.  
-> `intType(Int)`: An integer type.  
-> `doubleType(Double)`: A double type.  
-> `floatType(Float)`: A float type.  
-> `longType(Long)`: A long type.  
-> `byteType(Byte)`: A byte type.  
-> `shortType(Short)`: A short type.  
-> `booleanType(Boolean)`: A boolean type.  
-> `charType(Char)`: A character type.
-> `pointerTypeFromPointerAddress(AxionEngine, Long ptrAddress)`: A pointer type that use a pre existing pointer.
-> `allocPointerType(AxionEngine, Long size)`: A pointer type that allocates a new space of `size` size.
+> `stringType(String)`: A string type.   
+> `intType(Int)`: An integer type.   
+> `doubleType(Double)`: A double type.   
+> `floatType(Float)`: A float type.   
+> `longType(Long)`: A long type.   
+> `byteType(Byte)`: A byte type.   
+> `shortType(Short)`: A short type.   
+> `booleanType(Boolean)`: A boolean type.   
+> `charType(Char)`: A character type. 
+> `pointerTypeFromPointerAddress(AxionEngine, Long ptrAddress)`: A pointer type that use a pre existing pointer. 
+> `allocPointerType(AxionEngine, Long size)`: A pointer type that allocates a new space of `size` size. 
 
 ## Closing the `AxionEngine` Object
 When you're done using the `AxionEngine` object, you should close it. This will free up any resources that were allocated by the WebAssembly module. Here's an example of how to close an `AxionEngine` object:

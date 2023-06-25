@@ -29,7 +29,7 @@ enum class EnumWasmType {
             STRING -> ValType.I32 //ptr size
             CSTRING -> ValType.I32 //ptr size
             POINTER -> ValType.I32 //ptr size
-            VOID -> ValType.I64 //don't ask me why please
+            else -> throw Exception("Invalid type")
         }
     }
 }

@@ -16,10 +16,9 @@ private fun mapStructure(structure: Class<*>): List<StructureField> {
     val fields = structure.declaredFields;
     for(field in fields) {
         field.getDeclaredAnnotation(DeclaredField::class.java) ?: continue;
-        val name = field.name;
         val type = field.type;
         val size = getTypeSize(type);
-        val structureField = StructureField(name, type, currentOffset);
+        val structureField = StructureField(type, currentOffset);
         currentOffset += size;
 
         result.add(structureField);

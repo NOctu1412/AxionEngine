@@ -2,14 +2,12 @@ package dev.axion.types.impl
 
 import dev.axion.types.WasmType
 
-data class AllocatedStringReference(
+data class AllocatedCStringReference(
     var pointer: Long,
     var size: Long
 )
 
-//used for String object in rust
-//if you want to get a CString, use the CStringWasmType method
-class StringWasmType(
+class CStringWasmType(
     private val string: String,
     private val allocatedStringReference: AllocatedStringReference = AllocatedStringReference(0, 0),
     private var autoFree: Boolean = true,
@@ -17,9 +15,9 @@ class StringWasmType(
     string,
     toLong = {
         allocatedStringReference.let {
-            it.pointer = allocate(string.length.toLong())
+            it.pointer = allocate(string.length.toLong()+1)
             getDefaultMemory().write(it.pointer.toInt(), string.toByteArray())
-            it.pointer = createStringObject(it.pointer, string.length.toLong())
+            getDefaultMemory().write(it.pointer.toInt()+string.length, byteArrayOf(0)) //null terminator
             it.pointer
         }
     },
@@ -27,12 +25,11 @@ class StringWasmType(
         allocatedStringReference.let {
             if(autoFree) {
                 free(it.pointer, it.size)
-                destroyStringObject(it.pointer)
             }
         }
     },
 ) {
-    fun setAutoFree(autoFree: Boolean): StringWasmType {
+    fun setAutoFree(autoFree: Boolean): CStringWasmType {
         this.autoFree = autoFree
         return this
     }

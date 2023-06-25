@@ -34,7 +34,7 @@ class AxionEngine(wasmBinary: ByteArray, imports: List<WasmImport>) {
     }
 
     fun getStringObjectBuffer(ptr: Long): Long {
-        return callExport("get_string_buffer", longArrayOf(ptr))[0]
+        return callExport("get_c_string_from_string", longArrayOf(ptr))[0]
     }
 
     fun free(ptr: Long, size: Long) {

@@ -14,6 +14,7 @@ fun Long.toWasmType() = LongWasmType(this)
 fun Float.toWasmType() = FloatWasmType(this)
 fun Double.toWasmType() = DoubleWasmType(this)
 fun String.toWasmType() = StringWasmType(this)
+fun String.toCStringWasmType() = CStringWasmType(this)
 
 fun Long.toWasmType(engine: AxionEngine, argumentType: EnumWasmType): WasmType {
     return when(argumentType) {
@@ -25,6 +26,20 @@ fun Long.toWasmType(engine: AxionEngine, argumentType: EnumWasmType): WasmType {
         EnumWasmType.LONG -> LongWasmType(this)
         EnumWasmType.FLOAT -> FloatWasmType(this.toFloat())
         EnumWasmType.DOUBLE -> DoubleWasmType(this.toDouble())
+        EnumWasmType.CSTRING -> engine.let {
+            val pointer = PointerWasmType(engine, this)
+            var string = ""
+            var i = 0
+
+            while (true) {
+                val char: Char = pointer.getArrayElement(i)
+                if (char == 0.toChar()) break
+                string += char
+                i++
+            }
+
+            CStringWasmType(string)
+        }
         EnumWasmType.STRING -> engine.let {
             val length = it.getStringObjectLength(this)
             val buffer = it.getStringObjectBuffer(this)

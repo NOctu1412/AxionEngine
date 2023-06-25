@@ -12,7 +12,7 @@ import java.nio.ByteOrder
 
 class PointerWasmType(
     private val engine: AxionEngine,
-    val ptr: Long = -1,
+    val ptr: Long,
     val size: Long = -1L,
     private val byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN,
     private var autoFree: Boolean = true

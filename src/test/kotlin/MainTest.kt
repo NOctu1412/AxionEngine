@@ -4,6 +4,7 @@ import dev.axion.extension.toWasmType
 import dev.axion.types.*
 import dev.axion.types.impl.CStringWasmType
 import dev.axion.types.impl.PointerWasmType
+import dev.axion.types.impl.StringWasmType
 import java.io.File
 
 fun main() {
@@ -13,16 +14,16 @@ fun main() {
 
     val engine = AxionEngine(scriptBytes, listOf())
 
+    //TEST 1//
     val structure = TestStructure("John", 20, 1.8F)
     println("Base structure: $structure")
 
-    val structurePointer = PointerWasmType.allocateStructurePointer(engine, structure, autoFree = false)
-    val result = engine.callExport("test", EnumWasmType.CSTRING,
+    val structurePointer = PointerWasmType.allocateStructurePointer(engine, structure)
+    val result = engine.callExport("test", EnumWasmType.STRING,
         structurePointer
-    ) as CStringWasmType
+    ) as StringWasmType
 
     println(result.value)
-    //println("New structure: ${result.getThisPointerAsStructure(TestStructure::class.java)}")
 
     engine.free(structurePointer.ptr, structurePointer.size)
 

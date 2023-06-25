@@ -76,8 +76,10 @@ class AxionEngine(wasmBinary: ByteArray, imports: List<WasmImport>) {
         return returnValues
     }
 
+    var defaultMemory = "memory"
+
     fun getDefaultMemory(): Memory {
-        return getMemory("memory")
+        return getMemory(defaultMemory)
     }
 
     fun getMemory(name: String): Memory {

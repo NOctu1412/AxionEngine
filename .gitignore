@@ -30,3 +30,8 @@ bin/
 
 ## random intellij shit ##
 .idea/misc.xml
+
+### RUST EXEMPLE ###
+rust_exemple/Cargo.lock
+rust_exemple/pkg
+rust_exemple/target

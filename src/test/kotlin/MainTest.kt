@@ -8,9 +8,8 @@ import dev.axion.types.impl.StringWasmType
 import java.io.File
 
 fun main() {
-    val scriptPath = "D:\\RustWasmTest\\pkg\\RustWasmTest_bg.wasm"
-    val scriptFile = File(scriptPath)
-    val scriptBytes = scriptFile.readBytes()
+    val scriptPath = "rust_exemple/pkg/RustWasmTest_bg.wasm"
+    val scriptBytes = File(scriptPath).readBytes()
 
     val engine = AxionEngine(scriptBytes, listOf())
 

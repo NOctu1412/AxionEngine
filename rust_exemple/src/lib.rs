@@ -12,10 +12,12 @@ pub struct TestStructure {
 
 extern "C" {
     pub fn kotlin_print(str: *mut String);
+    pub fn double_test(x: f64);
 }
 
 #[no_mangle]
 pub unsafe fn test(x: [i64; 4]) -> i64 {
     kotlin_print(into_mut_ptr(String::from("Hello from Rust !")));
+    //double_test(32.0);
     x[0] + x[1] + x[2] + x[3]
 }

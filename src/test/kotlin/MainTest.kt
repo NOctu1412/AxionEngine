@@ -8,7 +8,8 @@ fun main() {
     val scriptBytes = File(scriptPath).readBytes()
 
     val engine = AxionEngine(scriptBytes, listOf(
-        TestImport()
+        KotlinPrintImport(),
+        DoubleTestImport()
     ))
 
     //TEST 1//

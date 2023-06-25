@@ -12,6 +12,7 @@ data class AllocatedStringReference(
 class StringWasmType(
     private val string: String,
     private val allocatedStringReference: AllocatedStringReference = AllocatedStringReference(0, 0),
+    private var autoFree: Boolean = true,
 ) : WasmType(
     string,
     toLong = {
@@ -24,8 +25,15 @@ class StringWasmType(
     },
     cleanMemory = {
         allocatedStringReference.let {
-            free(it.pointer, it.size)
-            destroyStringObject(it.pointer)
+            if(autoFree) {
+                free(it.pointer, it.size)
+                destroyStringObject(it.pointer)
+            }
         }
     },
-)
+) {
+    fun setAutoFree(autoFree: Boolean): StringWasmType {
+        this.autoFree = autoFree
+        return this
+    }
+}

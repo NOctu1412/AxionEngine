@@ -10,10 +10,11 @@ pub struct TestStructure {
     height: f32,
 }
 
+extern "C" {
+    pub fn test_import(str: *mut String, a: i32, b: i32) -> i32;
+}
+
 #[no_mangle]
-pub fn test(x: *mut TestStructure) -> *mut String {
-    let x = extract_mut_ptr(x);
-    let mut name = extract_mut_ptr(x.name);
-    name.push_str(" Baka");
-    into_mut_ptr(name)
+pub unsafe fn test(x: *mut TestStructure) -> i32 {
+    test_import((*x).name, 32, 65)
 }

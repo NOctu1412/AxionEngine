@@ -10,7 +10,7 @@ import dev.axion.extension.toWasmType
 
 class AxionEngine(wasmBinary: ByteArray, imports: List<WasmImport>) {
     private val wasmerInstance: Instance
-    
+
     companion object {
         init {
             Natives.initialize(0x500)
@@ -18,6 +18,9 @@ class AxionEngine(wasmBinary: ByteArray, imports: List<WasmImport>) {
     }
 
     init {
+        imports.forEach {
+            it.setEngine(this)
+        }
         wasmerInstance = Instance.create(wasmBinary, Options.empty(), imports)
     }
 
@@ -49,8 +52,10 @@ class AxionEngine(wasmBinary: ByteArray, imports: List<WasmImport>) {
         return wasmerInstance.execute(name, args)
     }
 
-    fun callExport(name: String, returnType: EnumWasmType, vararg args: WasmType): WasmType {
-        return callExport(name, listOf(returnType), *args)[0]
+    fun callExport(name: String, returnType: EnumWasmType, vararg args: WasmType): WasmType? {
+        val result = callExport(name, listOf(returnType), *args)
+        if(result.isEmpty()) return null
+        return result[0]
     }
 
     fun callExport(name: String, returnsType: List<EnumWasmType>, vararg args: WasmType): List<WasmType> {

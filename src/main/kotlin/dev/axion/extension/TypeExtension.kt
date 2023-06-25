@@ -16,8 +16,8 @@ fun Double.toWasmType() = DoubleWasmType(this)
 fun String.toWasmType() = StringWasmType(this)
 fun String.toCStringWasmType() = CStringWasmType(this)
 
-fun Long.toWasmType(engine: AxionEngine, argumentType: EnumWasmType): WasmType {
-    return when(argumentType) {
+fun Long.toWasmType(engine: AxionEngine, wasType: EnumWasmType): WasmType {
+    return when(wasType) {
         EnumWasmType.BYTE -> ByteWasmType(this.toByte())
         EnumWasmType.CHAR -> CharWasmType(this.toInt().toChar())
         EnumWasmType.BOOLEAN -> BooleanWasmType(this == 1L)
@@ -52,5 +52,6 @@ fun Long.toWasmType(engine: AxionEngine, argumentType: EnumWasmType): WasmType {
             StringWasmType(string)
         }
         EnumWasmType.POINTER -> return PointerWasmType(engine, this)
+        else -> throw IllegalArgumentException("Unknown argument type: $wasType")
     }
 }

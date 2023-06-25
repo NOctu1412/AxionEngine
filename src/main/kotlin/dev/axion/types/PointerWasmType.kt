@@ -2,25 +2,30 @@ package dev.axion.types
 
 import com.github.salpadding.wasmer.Memory
 import dev.axion.*
+import dev.axion.structure.getPointerFromStructure
 import dev.axion.structure.getStructureFromPointer
 import java.nio.ByteOrder
 
 //TODO: writing to pointers
 
-class PointerWasmType(val axionEngine: AxionEngine, val ptr: Long = -1, val byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN, val size: Long = -1L) : WasmType(ptr) {
+class PointerWasmType(val axionEngine: AxionEngine, val ptr: Long = -1, val byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN, val size: Long = -1L, private var autoFree: Boolean = true) : WasmType(ptr) {
     private val memory: Memory = axionEngine.getDefaultMemory();
     private val intPtr: Int = ptr.toInt();
 
     companion object {
-        inline fun <reified T> allocatePointer(axionEngine: AxionEngine, defaultValue: T, byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN): PointerWasmType {
-            val result = allocatePointerA(axionEngine, getTypeSize<T>().toLong(), byteOrder);
+        fun <C: Any> allocateStructurePointer(axionEngine: AxionEngine, structure: C, autoFree: Boolean = true): PointerWasmType {
+            return getPointerFromStructure(axionEngine, structure, autoFree = autoFree);
+        }
+
+        inline fun <reified T> allocatePointer(axionEngine: AxionEngine, defaultValue: T, byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN, autoFree: Boolean = true): PointerWasmType {
+            val result = allocatePointerA(axionEngine, getTypeSize<T>().toLong(), byteOrder, autoFree);
             result.write<T>(defaultValue);
             return result;
         }
 
-        fun allocatePointerA(axionEngine: AxionEngine, size: Long, byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN): PointerWasmType {
+        fun allocatePointerA(axionEngine: AxionEngine, size: Long, byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN, autoFree: Boolean = true): PointerWasmType {
             val ptrAddress = axionEngine.allocate(size);
-            return PointerWasmType(axionEngine, ptrAddress, byteOrder, size = size);
+            return PointerWasmType(axionEngine, ptrAddress, byteOrder, size = size, autoFree = autoFree);
         }
     }
 
@@ -193,7 +198,7 @@ class PointerWasmType(val axionEngine: AxionEngine, val ptr: Long = -1, val byte
     }
 
     override fun cleanMemory(axionEngine: AxionEngine) {
-        if(size == -1L) return;
+        if(size == -1L || !autoFree) return;
         axionEngine.free(ptr, size);
     }
 }

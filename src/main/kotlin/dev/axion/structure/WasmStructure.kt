@@ -1,5 +1,6 @@
 package dev.axion.structure
 
+import dev.axion.AxionEngine
 import dev.axion.getTypeSize
 import dev.axion.types.PointerWasmType
 import java.lang.reflect.Constructor
@@ -24,6 +25,8 @@ private fun mapStructure(structure: Class<*>): List<StructureField> {
         result.add(structureField);
     }
 
+    structureMapCache[structure] = result;
+
     return result;
 }
 
@@ -43,4 +46,21 @@ fun <C: Any> getStructureFromPointer(pointer: PointerWasmType, structureJavaClas
     }.toTypedArray()) as C;
 
     return structureInstance;
+}
+
+fun <C: Any> getPointerFromStructure(axionEngine: AxionEngine, structure: C, autoFree: Boolean = true): PointerWasmType {
+    val structureMap = mapStructure(structure.javaClass);
+
+    val structureSize = structureMap.last().offset + getTypeSize(structureMap.last().type); //super smart way
+    val pointer = PointerWasmType.allocatePointer(axionEngine, structureSize, autoFree = autoFree);
+
+    for((index, field) in structureMap.withIndex()) {
+        val offset = field.offset;
+        val structureField = structure.javaClass.declaredFields[index];
+        structureField.isAccessible = true;
+        val value = structureField.get(structure);
+        pointer.write(value, offset);
+    }
+
+    return pointer;
 }

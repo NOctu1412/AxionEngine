@@ -9,9 +9,11 @@ fun main() {
 
     val axionEngine = AxionEngine(scriptBytes, listOf());
 
-    val ptr = PointerWasmType.allocatePointer(axionEngine, 32.0.toFloat());
+    val structure = TestStructure("John", 20, 1.8F);
+    println("Base structure: $structure");
 
-    val result = axionEngine.callExport("test", WasmTypes.FLOAT, ptr).value;
+    val structurePointer = PointerWasmType.allocateStructurePointer(axionEngine, structure, autoFree = false);
+    val result = axionEngine.callExport("test", WasmTypes.POINTER, structurePointer) as PointerWasmType;
 
-    println(result);
+    println("New structure: ${result.getThisPointerAsStructure(TestStructure::class.java)}");
 }

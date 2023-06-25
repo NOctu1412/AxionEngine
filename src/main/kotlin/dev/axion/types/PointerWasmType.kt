@@ -2,6 +2,7 @@ package dev.axion.types
 
 import com.github.salpadding.wasmer.Memory
 import dev.axion.*
+import dev.axion.structure.getStructureFromPointer
 import java.nio.ByteOrder
 
 //TODO: writing to pointers
@@ -10,76 +11,98 @@ class PointerWasmType(val axionEngine: AxionEngine, val ptr: Long = -1, val byte
     private val memory: Memory = axionEngine.getDefaultMemory();
     private val intPtr: Int = ptr.toInt();
 
-    fun getAsByte(): Byte {
-        return memory.read(intPtr, 1)[0];
+    //i8
+    fun getAsByte(offset: Int = 0): Byte {
+        return memory.read(intPtr + offset, 1)[0];
     }
 
-    fun getAsChar(): Char {
-        return getAsByte().toInt().toChar();
+    //char
+    fun getAsChar(offset: Int = 0): Char {
+        return getAsByte(offset).toInt().toChar();
     }
 
-    fun getAsBool(): Boolean {
-        return getAsByte() == 1.toByte();
+    //bool
+    fun getAsBool(offset: Int = 0): Boolean {
+        return getAsByte(offset) == 1.toByte();
     }
 
-    fun getAsShort(): Short {
-        val bytes = memory.read(intPtr, 2);
+    //i16
+    fun getAsShort(offset: Int = 0): Short {
+        val bytes = memory.read(intPtr + offset, 2);
         return bytesToShort(bytes, byteOrder);
     }
 
-    fun getAsInteger(): Int {
-        val bytes = memory.read(intPtr, 4);
+    //i32
+    fun getAsInteger(offset: Int = 0): Int {
+        val bytes = memory.read(intPtr + offset, 4);
         return bytesToInt(bytes, byteOrder);
     }
 
-    fun getAsLong(): Long {
-        val bytes = memory.read(intPtr, 8);
+    //i64
+    fun getAsLong(offset: Int = 0): Long {
+        val bytes = memory.read(intPtr + offset, 8);
         return bytesToLong(bytes, byteOrder);
     }
 
-    fun getAsFloat(): Float {
-        val bytes = memory.read(intPtr, 4);
+    //f32
+    fun getAsFloat(offset: Int = 0): Float {
+        val bytes = memory.read(intPtr + offset, 4);
         return bytesToFloat(bytes, byteOrder);
     }
 
-    fun getAsDouble(): Double {
-        val bytes = memory.read(intPtr, 8);
+    //f64
+    fun getAsDouble(offset: Int = 0): Double {
+        val bytes = memory.read(intPtr + offset, 8);
         return bytesToDouble(bytes, byteOrder);
     }
 
-    fun getAsPointer(): PointerWasmType {
-        val pointerAddress = get<Long>();
+    //*mut void
+    fun getAsPointer(offset: Int = 0): PointerWasmType {
+        val pointerAddress = get<Long>(offset);
         return PointerWasmType(axionEngine, pointerAddress, byteOrder);
     }
 
-    //rust string object
-    fun getAsString(): String {
+    //*mut String
+    fun getAsString(offset: Int = 0): String {
         //getting the string//
-        val length = axionEngine.getStringObjectLength(ptr);
-        val buffer = axionEngine.getStringObjectBuffer(ptr);
+        val stringAddress = get<PointerWasmType>(offset);
+        val length = axionEngine.getStringObjectLength(stringAddress.ptr + offset);
+        val buffer = axionEngine.getStringObjectBuffer(stringAddress.ptr + offset);
         val stringByteBuffer = axionEngine.getDefaultMemory().read(buffer.toInt(), length.toInt());
         return String(stringByteBuffer);
     }
 
-    inline fun <reified T> get(): T {
-        return when (T::class) {
-            Byte::class -> getAsByte() as T
-            Char::class -> getAsChar() as T
-            Boolean::class -> getAsBool() as T
-            Short::class -> getAsShort() as T
-            Int::class -> getAsInteger() as T
-            Long::class -> getAsLong() as T
-            Float::class -> getAsFloat() as T
-            Double::class -> getAsDouble() as T
-            String::class -> getAsString() as T
-            PointerWasmType::class -> getAsPointer() as T
-            else -> throw IllegalArgumentException("Unsupported type: ${T::class.simpleName}")
+    inline fun <reified T> get(offset: Int = 0): T {
+        return get(T::class.java, offset) as T;
+    }
+
+    fun get(javaClass: Class<*>, offset: Int = 0): Any {
+        return when (javaClass) {
+            Long::class.java, java.lang.Long::class.java -> getAsLong(offset)
+            Byte::class.java, java.lang.Byte::class.java -> getAsByte(offset)
+            Char::class.java, java.lang.Character::class.java -> getAsChar(offset)
+            Boolean::class.java, java.lang.Boolean::class.java -> getAsBool(offset)
+            Short::class.java, java.lang.Short::class.java -> getAsShort(offset)
+            Int::class.java, java.lang.Integer::class.java -> getAsInteger(offset)
+            Float::class.java, java.lang.Float::class.java -> getAsFloat(offset)
+            Double::class.java, java.lang.Double::class.java -> getAsDouble(offset)
+            String::class.java, java.lang.String::class.java -> getAsString(offset)
+            PointerWasmType::class.java -> getAsPointer(offset)
+            else -> throw IllegalArgumentException("Unsupported type: ${javaClass.name}")
         }
     }
 
+    fun getArrayElement(javaClass: Class<*>, index: Int): Any {
+        val typeSize = getTypeSize(javaClass);
+        return PointerWasmType(axionEngine, ptr+index*typeSize, byteOrder).get(javaClass);
+    }
+
     inline fun <reified T> getArrayElement(index: Int): T {
-        val typeSize = getTypeSize<T>();
-        return PointerWasmType(axionEngine, ptr+index*typeSize, byteOrder).get<T>();
+        return getArrayElement(T::class.java, index) as T;
+    }
+
+    fun <C: Any> getThisPointerAsStructure(structureJavaClass: Class<C>): C {
+        return getStructureFromPointer(this, structureJavaClass);
     }
 
     override fun toLong(axionEngine: AxionEngine): Long {

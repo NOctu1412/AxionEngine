@@ -51,17 +51,21 @@ fun bytesToDouble(bytes: ByteArray, byteOrder: ByteOrder): Double {
 }
 
 inline fun <reified T> getTypeSize(): Int {
-    return when (T::class) {
-        Byte::class -> 1
-        Char::class -> 2
-        Boolean::class -> 1
-        Short::class -> 2
-        Int::class -> 4
-        Long::class -> 8
-        Float::class -> 4
-        Double::class -> 8
-        String::class -> 8 //pointer size
-        PointerWasmType::class -> 8 //pointer size
-        else -> throw IllegalArgumentException("Unsupported type: ${T::class.simpleName}")
+    return getTypeSize(T::class.java);
+}
+
+fun getTypeSize(typeClass: Class<*>): Int {
+    return when (typeClass) {
+        Byte::class.java, java.lang.Byte::class.java -> 1
+        Char::class.java, java.lang.Character::class.java -> 2
+        Boolean::class.java, java.lang.Boolean::class.java -> 1
+        Short::class.java, java.lang.Short::class.java -> 2
+        Int::class.java, java.lang.Integer::class.java -> 4
+        Long::class.java, java.lang.Long::class.java -> 8
+        Float::class.java, java.lang.Float::class.java -> 4
+        Double::class.java, java.lang.Double::class.java -> 8
+        String::class.java, java.lang.String::class.java -> 4 //pointer size
+        PointerWasmType::class.java -> 4 //pointer size
+        else -> throw IllegalArgumentException("Unsupported type: ${typeClass.simpleName}")
     }
 }

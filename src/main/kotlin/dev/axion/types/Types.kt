@@ -42,33 +42,33 @@ fun pointerType(axionEngine: AxionEngine, value: Long, byteOrder: ByteOrder = By
     return PointerWasmType(axionEngine, value, byteOrder);
 }
 
-fun valueFromLong(axionEngine: AxionEngine, argumentType: ArgumentType, value: Long): WasmType {
+fun valueFromLong(axionEngine: AxionEngine, argumentType: WasmTypes, value: Long): WasmType {
     when(argumentType) {
-        ArgumentType.BYTE -> {
+        WasmTypes.BYTE -> {
             return ByteWasmType(value.toByte());
         }
-        ArgumentType.CHAR -> {
+        WasmTypes.CHAR -> {
             return CharWasmType(value.toInt().toChar());
         }
-        ArgumentType.BOOLEAN -> {
+        WasmTypes.BOOLEAN -> {
             return BooleanWasmType(value == 1L);
         }
-        ArgumentType.SHORT -> {
+        WasmTypes.SHORT -> {
             return ShortWasmType(value.toShort());
         }
-        ArgumentType.INTEGER -> {
+        WasmTypes.INTEGER -> {
             return IntegerWasmType(value.toInt());
         }
-        ArgumentType.LONG -> {
+        WasmTypes.LONG -> {
             return LongWasmType(value);
         }
-        ArgumentType.FLOAT -> {
+        WasmTypes.FLOAT -> {
             return FloatWasmType(value.toFloat());
         }
-        ArgumentType.DOUBLE -> {
+        WasmTypes.DOUBLE -> {
             return DoubleWasmType(value.toDouble());
         }
-        ArgumentType.STRING -> {
+        WasmTypes.STRING -> {
             //getting the string//
             val length = axionEngine.getStringObjectLength(value);
             val buffer = axionEngine.getStringObjectBuffer(value);
@@ -79,7 +79,7 @@ fun valueFromLong(axionEngine: AxionEngine, argumentType: ArgumentType, value: L
             axionEngine.destroyStringObject(value);
             return StringWasmType(string);
         }
-        ArgumentType.POINTER -> {
+        WasmTypes.POINTER -> {
             return PointerWasmType(axionEngine, value);
         }
         else -> {

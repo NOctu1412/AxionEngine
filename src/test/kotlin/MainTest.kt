@@ -9,8 +9,8 @@ fun main() {
 
     val axionEngine = AxionEngine(scriptBytes, listOf());
 
-    println(
-        (axionEngine.callExport("test", ArgumentType.POINTER
-        ) as PointerWasmType).get<String>()
-    );
+    val result = axionEngine.callExport("test", WasmTypes.POINTER) as PointerWasmType;
+    val structure = result.getThisPointerAsStructure(TestStructure::class.java);
+
+    println(structure);
 }

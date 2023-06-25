@@ -5,7 +5,7 @@ import com.github.salpadding.wasmer.Memory
 import com.github.salpadding.wasmer.Natives
 import com.github.salpadding.wasmer.Options
 import dev.axion.types.WasmType
-import dev.axion.types.ArgumentType
+import dev.axion.types.WasmTypes
 import dev.axion.types.valueFromLong
 
 private var nativesInitialized = false;
@@ -49,11 +49,11 @@ class AxionEngine(wasmBinary: ByteArray, imports: List<WasmImport>) {
         return wasmerInstance.execute(name, args);
     }
 
-    fun callExport(name: String, returnType: ArgumentType, vararg args: WasmType): WasmType {
+    fun callExport(name: String, returnType: WasmTypes, vararg args: WasmType): WasmType {
         return callExport(name, listOf(returnType), *args)[0];
     }
 
-    fun callExport(name: String, returnsType: List<ArgumentType>, vararg args: WasmType): List<WasmType> {
+    fun callExport(name: String, returnsType: List<WasmTypes>, vararg args: WasmType): List<WasmType> {
         //build long list from arguments//
         val longArgs = LongArray(args.size);
         for (i in args.indices) {

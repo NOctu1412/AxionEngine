@@ -1,6 +1,6 @@
 package dev.axion.types
 
-enum class ArgumentType {
+enum class WasmTypes {
     BYTE,
     CHAR,
     BOOLEAN,

@@ -16,4 +16,8 @@ fun main() {
     val result = axionEngine.callExport("test", WasmTypes.POINTER, structurePointer) as PointerWasmType;
 
     println("New structure: ${result.getThisPointerAsStructure(TestStructure::class.java)}");
+
+    axionEngine.free(structurePointer.ptr, structurePointer.size);
+
+    axionEngine.close();
 }

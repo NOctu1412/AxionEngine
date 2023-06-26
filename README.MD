@@ -1,7 +1,7 @@
 
 # Axion Engine
 
-This library is used to get a good interopability between Kotlin and WebAssembly (especially with Rust but I think you can port the [wasm_utils.rs](https://github.com/NOctu1412/AxionEngine/blob/master/rust_exemple/src/wasm_utils.rs) to other languages).
+This library is used to get a good interopability between Kotlin and WebAssembly (especially with Rust but I think you can port the [wasm_utils.rs](https://github.com/NOctu1412/AxionEngine/blob/master/rust_example/src/wasm_utils.rs) to other languages).
 
 
 

@@ -46,6 +46,6 @@ bin/
 .idea/misc.xml
 
 ### RUST EXEMPLE ###
-rust_exemple/Cargo.lock
-rust_exemple/pkg
-rust_exemple/target
+rust_example/Cargo.lock
+rust_example/pkg
+rust_example/target

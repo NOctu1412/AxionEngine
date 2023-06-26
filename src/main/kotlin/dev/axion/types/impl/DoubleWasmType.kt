@@ -4,5 +4,5 @@ import dev.axion.types.WasmType
 
 class DoubleWasmType(private val double: Double) : WasmType(
     double,
-    toLong = { double.toBits() },
+    toWasmerValue = { double as java.lang.Double },
 )

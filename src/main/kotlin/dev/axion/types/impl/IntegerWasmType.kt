@@ -4,5 +4,5 @@ import dev.axion.types.WasmType
 
 class IntegerWasmType(private val int: Int) : WasmType(
     int,
-    toLong = { int.toLong() },
+    toWasmerValue = { int as Integer },
 )

@@ -3,8 +3,8 @@ package dev.axion.types.impl
 import dev.axion.types.WasmType
 
 data class AllocatedStringReference(
-    var pointer: Long,
-    var size: Long
+    var pointer: Int,
+    var size: Int
 )
 
 //used for String object in rust
@@ -15,11 +15,13 @@ class StringWasmType(
     private var autoFree: Boolean = true,
 ) : WasmType(
     string,
-    toLong = {
+    toWasmerValue = {
         allocatedStringReference.let {
-            it.pointer = allocate(string.length.toLong())
-            getDefaultMemory().write(it.pointer.toInt(), string.toByteArray())
-            it.pointer = createStringObject(it.pointer, string.length.toLong())
+            it.pointer = allocate(string.length)
+            for(i in string.indices) {
+                getDefaultMemory().buffer().put(it.pointer + i, string[i].code.toByte())
+            }
+            it.pointer = createStringObject(it.pointer, string.length)
             it.pointer
         }
     },

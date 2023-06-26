@@ -4,5 +4,5 @@ import dev.axion.types.WasmType
 
 class FloatWasmType(private val float: Float) : WasmType(
     float,
-    toLong = { float.toBits().toLong() },
+    toWasmerValue = { java.lang.Float.valueOf(float) },
 )

@@ -1,32 +1,31 @@
 package dev.axion.types.impl
 
-import com.github.salpadding.wasmer.Memory
 import dev.axion.*
 import dev.axion.extension.*
 import dev.axion.structure.getPointerFromStructure
 import dev.axion.structure.getStructureFromPointer
 import dev.axion.types.WasmType
+import org.wasmer.Memory
 import java.nio.ByteOrder
 
 //TODO: writing to pointers
 
 class PointerWasmType(
     private val engine: AxionEngine,
-    val ptr: Long,
-    val size: Long = -1L,
+    val ptr: Int,
+    val size: Int = -1,
     private val byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN,
     private var autoFree: Boolean = true
 ) : WasmType(
     ptr,
-    toLong = { ptr },
+    toWasmerValue = { ptr as Integer },
     cleanMemory = cleanMemory@{
-        if(size == -1L || !autoFree) return@cleanMemory
+        if(size == -1 || !autoFree) return@cleanMemory
         engine.free(ptr, size)
     }
 ) {
 
     private val memory: Memory = engine.getDefaultMemory()
-    private val intPtr: Int = ptr.toInt()
 
     companion object {
         inline fun <reified C: Any> allocateArray(engine: AxionEngine, array: Array<C>, autoFree: Boolean = true): PointerWasmType {
@@ -34,7 +33,7 @@ class PointerWasmType(
 
             val result = allocatePointerA(
                 engine = engine,
-                size = array.size.toLong() * array[0]::class.java.getWasmTypeSize().toLong(),
+                size = array.size * array[0]::class.java.getWasmTypeSize(),
                 autoFree = autoFree
             )
             array.forEachIndexed { index, value ->
@@ -50,7 +49,7 @@ class PointerWasmType(
         inline fun <reified T> allocatePointer(engine: AxionEngine, defaultValue: T, byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN, autoFree: Boolean = true): PointerWasmType {
             val result = allocatePointerA(
                 engine = engine,
-                size = defaultValue!!::class.java.getWasmTypeSize().toLong(),
+                size = defaultValue!!::class.java.getWasmTypeSize(),
                 byteOrder = byteOrder,
                 autoFree = autoFree
             )
@@ -58,7 +57,7 @@ class PointerWasmType(
             return result
         }
 
-        fun allocatePointerA(engine: AxionEngine, size: Long, byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN, autoFree: Boolean = true): PointerWasmType {
+        fun allocatePointerA(engine: AxionEngine, size: Int, byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN, autoFree: Boolean = true): PointerWasmType {
             val ptrAddress = engine.allocate(size)
             return PointerWasmType(
                 engine = engine,
@@ -71,14 +70,14 @@ class PointerWasmType(
     }
 
     //i8
-    fun getAsByte(offset: Int = 0) = memory.read(intPtr + offset, 1)[0]
+    fun getAsByte(offset: Int = 0) = memory.buffer().get(ptr + offset)
 
     fun writeByte(byte: Byte, offset: Int = 0) {
-        memory.write(intPtr + offset, byteArrayOf(byte))
+        memory.buffer().put(ptr + offset, byte)
     }
 
     //char
-    fun getAsChar(offset: Int = 0) = getAsByte(offset).toInt().toChar()
+    fun getAsChar(offset: Int = 0) = memory.buffer().getChar(offset)
 
     fun writeChar(char: Char, offset: Int = 0) {
         writeByte(char.code.toByte(), offset)
@@ -92,48 +91,48 @@ class PointerWasmType(
     }
 
     //i16
-    fun getAsShort(offset: Int = 0) = memory.read(intPtr + offset, 2).toShort(byteOrder)
+    fun getAsShort(offset: Int = 0) = memory.buffer().getShort(ptr + offset)
 
     fun writeShort(short: Short, offset: Int = 0) {
-        memory.write(intPtr + offset, short.toBytes(byteOrder))
+        memory.buffer().putShort(ptr + offset, short)
     }
 
     //i32
-    fun getAsInteger(offset: Int = 0) = memory.read(intPtr + offset, 4).toInt(byteOrder)
+    fun getAsInteger(offset: Int = 0) = memory.buffer().getInt(ptr + offset)
 
     fun writeInteger(int: Int, offset: Int = 0) {
-        memory.write(intPtr + offset, int.toBytes(byteOrder))
+        memory.buffer().putInt(ptr + offset, int)
     }
 
     //i64
-    fun getAsLong(offset: Int = 0) = memory.read(intPtr + offset, 8).toLong(byteOrder)
+    fun getAsLong(offset: Int = 0) = memory.buffer().getLong(ptr + offset)
 
     fun writeLong(long: Long, offset: Int = 0) {
-        memory.write(intPtr + offset, long.toBytes(byteOrder))
+        memory.buffer().putLong(ptr + offset, long)
     }
 
     //f32
-    fun getAsFloat(offset: Int = 0) = memory.read(intPtr + offset, 4).toFloat(byteOrder)
+    fun getAsFloat(offset: Int = 0) = memory.buffer().getFloat(ptr + offset)
 
     fun writeFloat(float: Float, offset: Int = 0) {
-        memory.write(intPtr + offset, float.toBytes(byteOrder))
+        memory.buffer().putFloat(ptr + offset, float)
     }
 
     //f64
-    fun getAsDouble(offset: Int = 0) = memory.read(intPtr + offset, 8).toDouble(byteOrder)
+    fun getAsDouble(offset: Int = 0) = memory.buffer().getDouble(ptr + offset)
 
     fun writeDouble(double: Double, offset: Int = 0) {
-        memory.write(intPtr + offset, double.toBytes(byteOrder))
+        memory.buffer().putDouble(ptr + offset, double)
     }
 
     //*mut void
     fun getAsPointer(offset: Int = 0): PointerWasmType {
-        val pointerAddress = get<Long>(offset)
+        val pointerAddress = get<Int>(ptr + offset)
         return PointerWasmType(engine = engine, ptr = pointerAddress, byteOrder = byteOrder)
     }
 
     fun writePointer(pointer: PointerWasmType, offset: Int = 0) {
-        writeLong(pointer.ptr, offset)
+        writeInteger(pointer.ptr, offset)
     }
 
     //*mut String
@@ -144,17 +143,21 @@ class PointerWasmType(
         return engine.let {
             val length = it.getStringObjectLength(stringAddress.ptr + offset)
             val buffer = it.getStringObjectBuffer(stringAddress.ptr + offset)
-            engine.getDefaultMemory().read(buffer.toInt(), length.toInt()).toString(Charsets.UTF_8)
+            val stringBuffer = byteArrayOf()
+            memory.buffer().get(stringBuffer, 0, buffer)
+            String(stringBuffer, 0, length.toInt())
         }
     }
 
     fun writeString(string: String, offset: Int = 0) {
         //writing the string//
         engine.apply {
-            val stringPointer = allocate(string.length.toLong())
-            getDefaultMemory().write(stringPointer.toInt(), string.toByteArray())
-            val stringObjectPointer = createStringObject(stringPointer, string.length.toLong())
-            writeLong(stringObjectPointer, offset) //writing the string object pointer address, it is the same as writePointer literally//
+            val stringPointer = allocate(string.length)
+            for(i in string.indices) {
+                getDefaultMemory().buffer().put(stringPointer + i, string[i].code.toByte())
+            }
+            val stringObjectPointer = createStringObject(stringPointer, string.length)
+            writeInteger(stringObjectPointer, offset) //writing the string object pointer address, it is the same as writePointer literally//
         }
     }
 

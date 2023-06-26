@@ -1,55 +1,49 @@
 package dev.axion
 
-import com.github.salpadding.wasmer.Instance
-import com.github.salpadding.wasmer.Memory
-import com.github.salpadding.wasmer.Natives
-import com.github.salpadding.wasmer.Options
 import dev.axion.types.WasmType
 import dev.axion.types.EnumWasmType
 import dev.axion.extension.toWasmType
+import org.wasmer.Instance
+import org.wasmer.Memory
+import org.wasmer.Module
 
-class AxionEngine(wasmBinary: ByteArray, imports: List<WasmImport>) {
-    private val wasmerInstance: Instance
-
-    companion object {
-        init {
-            Natives.initialize(0x500)
-        }
-    }
+class AxionEngine(wasmBinary: ByteArray) {
+    private val wasmModule: Module
+    private val wasmInstance: Instance
 
     init {
-        imports.forEach {
-            it.setEngine(this)
-        }
-        wasmerInstance = Instance.create(wasmBinary, Options.empty(), imports)
+        wasmModule = Module(wasmBinary)
+        //wasmInstance = wasmModule.instantiate(imports)
+        wasmInstance = wasmModule.instantiate()
     }
 
-    fun allocate(size: Long): Long {
-        return callExport("alloc_rust", longArrayOf(size))[0]
+    fun allocate(size: Int): Int {
+        return callExport("alloc_rust", arrayOf(size))[0] as Int
     }
 
-    fun createStringObject(ptr: Long, size: Long): Long {
-        return callExport("create_string", longArrayOf(ptr, size))[0]
+    fun createStringObject(ptr: Int, size: Int): Int {
+        return callExport("create_string", arrayOf(ptr, size))[0] as Int
     }
 
-    fun getStringObjectLength(ptr: Long): Long {
-        return callExport("get_string_length", longArrayOf(ptr))[0]
+    fun getStringObjectLength(ptr: Int): Int {
+        return callExport("get_string_length", arrayOf(ptr))[0] as Int
     }
 
-    fun getStringObjectBuffer(ptr: Long): Long {
-        return callExport("get_c_string_from_string", longArrayOf(ptr))[0]
+    //returns pointer
+    fun getStringObjectBuffer(ptr: Int): Int {
+        return callExport("get_c_string_from_string", arrayOf(ptr))[0] as Int
     }
 
-    fun free(ptr: Long, size: Long) {
-        callExport("free_rust", longArrayOf(ptr, size))
+    fun free(ptr: Int, size: Int) {
+        callExport("free_rust", arrayOf(ptr, size))
     }
 
-    fun destroyStringObject(ptr: Long) {
-        callExport("destroy_string", longArrayOf(ptr))
+    fun destroyStringObject(ptr: Int) {
+        callExport("destroy_string", arrayOf(ptr))
     }
 
-    private fun callExport(name: String, args: LongArray): LongArray {
-        return wasmerInstance.execute(name, args)
+    private fun callExport(name: String, args: Array<Any>): Array<Any> {
+        return wasmInstance.exports.getFunction(name).apply(*args) ?: return emptyArray<Any>()
     }
 
     fun callExport(name: String, returnType: EnumWasmType, vararg args: WasmType): WasmType? {
@@ -60,12 +54,12 @@ class AxionEngine(wasmBinary: ByteArray, imports: List<WasmImport>) {
 
     fun callExport(name: String, returnsType: List<EnumWasmType>, vararg args: WasmType): List<WasmType> {
         //build long list from arguments//
-        val longArgs = LongArray(args.size)
+        val valueArgs = arrayListOf<Any>()
         for (i in args.indices) {
-            longArgs[i] = args[i].toLong(this)
+            valueArgs.add(args[i].toWasmerValue(this))
         }
 
-        val result = callExport(name, longArgs)
+        val result = callExport(name, valueArgs.toTypedArray())
 
         //clean the used memory//
         for (i in args.indices) {
@@ -81,22 +75,15 @@ class AxionEngine(wasmBinary: ByteArray, imports: List<WasmImport>) {
         return returnValues
     }
 
-    private var _defaultMemory: String = "memory"
-    var defaultMemory: String
-        get() {
-            return _defaultMemory
-        }
-        set(value) { _defaultMemory = value }
-
     fun getDefaultMemory(): Memory {
-        return getMemory(defaultMemory)
+        return getMemory("memory")
     }
 
     fun getMemory(name: String): Memory {
-        return wasmerInstance.getMemory(name)
+        return wasmInstance.exports.getMemory(name)
     }
 
     fun close() {
-        wasmerInstance.close()
+        wasmInstance.close()
     }
 }

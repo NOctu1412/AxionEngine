@@ -42,7 +42,7 @@ fun ByteArray.toLong(byteOrder: ByteOrder): Long {
 }
 
 fun ByteArray.toFloat(byteOrder: ByteOrder): Float {
-    return Float.fromBits(this.toInt(byteOrder))
+    return ByteBuffer.wrap(this).order(byteOrder).getFloat()
 }
 
 fun ByteArray.toDouble(byteOrder: ByteOrder): Double {
@@ -86,11 +86,11 @@ fun Long.toBytes(byteOrder: ByteOrder): ByteArray {
 }
 
 fun Float.toBytes(byteOrder: ByteOrder): ByteArray {
-    return this.toRawBits().toBytes(byteOrder)
+    return ByteBuffer.allocate(4).order(byteOrder).putFloat(this).array()
 }
 
 fun Double.toBytes(byteOrder: ByteOrder): ByteArray {
-    return this.toRawBits().toBytes(byteOrder)
+    return ByteBuffer.allocate(8).order(byteOrder).putDouble(this).array()
 }
 
 

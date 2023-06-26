@@ -4,5 +4,5 @@ import dev.axion.types.WasmType
 
 class ShortWasmType(private val short: Short) : WasmType(
     short,
-    toLong = { short.toLong() }
+    toWasmerValue = { short.toInt() as Integer }
 )

@@ -3,8 +3,8 @@ package dev.axion.types.impl
 import dev.axion.types.WasmType
 
 data class AllocatedCStringReference(
-    var pointer: Long,
-    var size: Long
+    var pointer: Int,
+    var size: Int
 )
 
 class CStringWasmType(
@@ -13,12 +13,12 @@ class CStringWasmType(
     private var autoFree: Boolean = true,
 ) : WasmType(
     string,
-    toLong = {
+    toWasmerValue = {
         allocatedStringReference.let {
-            it.pointer = allocate(string.length.toLong()+1)
-            getDefaultMemory().write(it.pointer.toInt(), string.toByteArray())
-            getDefaultMemory().write(it.pointer.toInt()+string.length, byteArrayOf(0)) //null terminator
-            it.pointer
+            it.pointer = allocate(string.length+1)
+            getDefaultMemory().buffer().put(string.toByteArray(), it.pointer, string.length+1)
+            getDefaultMemory().buffer().put(it.pointer+string.length, 0) //null terminator
+            it.pointer as Integer
         }
     },
     cleanMemory = {

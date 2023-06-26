@@ -4,6 +4,6 @@ import dev.axion.AxionEngine
 
 open class WasmType(
     val value: Any,
-    val toLong: AxionEngine.() -> Long,
+    val toWasmerValue: AxionEngine.() -> Any,
     val cleanMemory: AxionEngine.() -> Unit = { /* do nothing */ }
 )

@@ -18,7 +18,7 @@ class CStringWasmType(
             it.pointer = allocate(string.length+1)
             getDefaultMemory().buffer().put(string.toByteArray(), it.pointer, string.length+1)
             getDefaultMemory().buffer().put(it.pointer+string.length, 0) //null terminator
-            it.pointer as Integer
+            it.pointer
         }
     },
     cleanMemory = {

@@ -4,5 +4,5 @@ import dev.axion.types.WasmType
 
 class ByteWasmType(private val byte: Byte) : WasmType(
     byte,
-    toWasmerValue = { byte.toInt() as Integer }
+    toWasmerValue = { byte.toInt() }
 )

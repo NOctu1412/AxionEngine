@@ -8,8 +8,6 @@ import dev.axion.types.WasmType
 import org.wasmer.Memory
 import java.nio.ByteOrder
 
-//TODO: writing to pointers
-
 class PointerWasmType(
     private val engine: AxionEngine,
     val ptr: Int,
@@ -18,7 +16,7 @@ class PointerWasmType(
     private var autoFree: Boolean = true
 ) : WasmType(
     ptr,
-    toWasmerValue = { ptr as Integer },
+    toWasmerValue = { ptr },
     cleanMemory = cleanMemory@{
         if(size == -1 || !autoFree) return@cleanMemory
         engine.free(ptr, size)
@@ -145,7 +143,7 @@ class PointerWasmType(
             val buffer = it.getStringObjectBuffer(stringAddress.ptr + offset)
             val stringBuffer = byteArrayOf()
             memory.buffer().get(stringBuffer, 0, buffer)
-            String(stringBuffer, 0, length.toInt())
+            String(stringBuffer, 0, length)
         }
     }
 

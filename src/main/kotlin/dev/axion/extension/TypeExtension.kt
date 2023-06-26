@@ -15,6 +15,7 @@ fun Float.toWasmType() = FloatWasmType(this)
 fun Double.toWasmType() = DoubleWasmType(this)
 fun String.toWasmType() = StringWasmType(this)
 fun String.toCStringWasmType() = CStringWasmType(this)
+fun List<Any>.toWasmType(axionEngine: AxionEngine) = PointerWasmType.allocateArray(axionEngine, this.toTypedArray())
 
 fun Any.toWasmType(engine: AxionEngine, wasmType: EnumWasmType): WasmType {
     return when(wasmType) {

@@ -12,7 +12,7 @@ fun main() {
 
     //TEST 1//
     val result = engine.callExport("test", EnumWasmType.FLOAT,
-        PointerWasmType.allocateArray(engine, arrayOf(1L, 2L, 3L, 4L))
+        listOf(1L, 2L, 3L, 4L).toWasmType(engine),
     ) as FloatWasmType
 
     println(result.value)

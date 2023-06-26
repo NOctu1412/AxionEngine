@@ -4,5 +4,5 @@ import dev.axion.types.WasmType
 
 class CharWasmType(private val char: Char) : WasmType(
     char,
-    toWasmerValue = { char.code as Integer }
+    toWasmerValue = { char.code }
 )

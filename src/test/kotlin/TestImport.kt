@@ -1,13 +1,12 @@
-/*import dev.axion.WasmImport
+import dev.axion.extension.toWasmType
+import dev.axion.imports.WasmImport
 import dev.axion.types.EnumWasmType
-import dev.axion.types.impl.FloatWasmType
-import dev.axion.types.impl.IntegerWasmType
 
 class KotlinPrintImport : WasmImport(
     "kotlin_print",
     EnumWasmType.VOID, //return type
-    listOf(EnumWasmType.STRING),  //args types
-    { axionEngine, instance, args ->                                  //callback
+    arrayOf(EnumWasmType.STRING),  //args types
+    { axionEngine, args ->                                  //callback
         val firstArgument = args[0].value as String
 
         println(firstArgument)
@@ -18,15 +17,15 @@ class KotlinPrintImport : WasmImport(
 
 class DoubleTestImport : WasmImport(
     "double_test",
-    EnumWasmType.VOID, //return type
-    listOf(EnumWasmType.FLOAT, EnumWasmType.INTEGER),  //args types
-    { axionEngine, instance, args ->                                  //callback
-        val firstArgument = (args[0] as FloatWasmType).value as Float
-        val secondArgument = (args[1] as IntegerWasmType).value as Int
+    EnumWasmType.DOUBLE, //return type
+    arrayOf(EnumWasmType.DOUBLE, EnumWasmType.DOUBLE),  //args types
+    { axionEngine, args ->                                  //callback
+        val firstArgument = args[0].value as Double
+        val secondArgument = args[1].value as Double
 
         println(firstArgument)
         println(secondArgument)
 
-        null //for void functions, return null is good
+        (firstArgument * secondArgument).toWasmType()
     }
-)*/
+)

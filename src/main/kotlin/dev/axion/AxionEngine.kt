@@ -3,18 +3,19 @@ package dev.axion
 import dev.axion.types.WasmType
 import dev.axion.types.EnumWasmType
 import dev.axion.extension.toWasmType
+import dev.axion.imports.WasmImport
+import org.wasmer.Imports
 import org.wasmer.Instance
 import org.wasmer.Memory
 import org.wasmer.Module
 
-class AxionEngine(wasmBinary: ByteArray) {
+class AxionEngine(wasmBinary: ByteArray, vararg imports: WasmImport) {
     private val wasmModule: Module
     private val wasmInstance: Instance
 
     init {
         wasmModule = Module(wasmBinary)
-        //wasmInstance = wasmModule.instantiate(imports)
-        wasmInstance = wasmModule.instantiate()
+        wasmInstance = wasmModule.instantiate(Imports.from(imports.map { importToWasmerImportSpec(it) }, wasmModule))
     }
 
     fun allocate(size: Int): Int {
@@ -46,6 +47,14 @@ class AxionEngine(wasmBinary: ByteArray) {
         return wasmInstance.exports.getFunction(name).apply(*args) ?: return emptyArray<Any>()
     }
 
+    inline fun <reified T: WasmType> callExport(name: String, vararg args: WasmType): T {
+        return callExport(name, EnumWasmType.from<T>(), *args) as T
+    }
+
+    fun callExport(name: String, vararg args: WasmType) {
+        callExport(name, EnumWasmType.VOID, *args)
+    }
+
     fun callExport(name: String, returnType: EnumWasmType, vararg args: WasmType): WasmType? {
         val result = callExport(name, listOf(returnType), *args)
         if(result.isEmpty()) return null
@@ -73,6 +82,28 @@ class AxionEngine(wasmBinary: ByteArray) {
         }
 
         return returnValues
+    }
+
+    private fun importToWasmerImportSpec(import: WasmImport): Imports.Spec {
+        val argsTypes = import.argsTypes.map { it.toValueType() }
+
+        val function = fun(args: List<Number>): List<Number> {
+            val argsValues = ArrayList<WasmType>()
+            for (i in args.indices) {
+                argsValues.add(args[i].toWasmType(this, import.argsTypes[i]))
+            }
+
+            val result = import.callback(this, argsValues.toTypedArray()) ?: return emptyList()
+
+            return listOf(result.toWasmerValue(this) as Number)
+        }
+
+        return Imports.Spec(import.namespace,
+            import.name,
+            function,
+            argsTypes,
+            if (import.returnType == EnumWasmType.VOID) emptyList()
+            else listOf(import.returnType.toValueType()))
     }
 
     fun getDefaultMemory(): Memory {

@@ -1,5 +1,6 @@
 package dev.axion.types
 
+import dev.axion.types.impl.*
 import org.wasmer.Type
 
 enum class EnumWasmType {
@@ -15,6 +16,25 @@ enum class EnumWasmType {
     CSTRING, //*mut u8
     POINTER, //*mut void
     VOID; //void
+
+    companion object {
+        inline fun <reified T: WasmType> from(): EnumWasmType {
+            return when(T::class) {
+                ByteWasmType::class -> BYTE
+                CharWasmType::class -> CHAR
+                BooleanWasmType::class -> BOOLEAN
+                ShortWasmType::class -> SHORT
+                IntegerWasmType::class -> INTEGER
+                LongWasmType::class -> LONG
+                FloatWasmType::class -> FLOAT
+                DoubleWasmType::class -> DOUBLE
+                StringWasmType::class -> STRING
+                CStringWasmType::class -> CSTRING
+                PointerWasmType::class -> POINTER
+                else -> VOID
+            }
+        }
+    }
 
     fun toValueType(): Type {
         return when(this) {

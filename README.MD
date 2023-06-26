@@ -1,148 +1,84 @@
-# AxionEngine
-The `AxionEngine` is a [wasmer-jni](https://github.com/Salpadding/wasmer-jni) wrapper to interact with a WebAssembly module and call its exported functions. It provides methods for allocating memory, working with string objects, calling exports, and managing the instance.
 
-## Creating an `AxionEngine` Object
+# Axion Engine
 
-To create an `AxionEngine` object, you need to provide the WebAssembly binary as a `ByteArray` and optionally a list of imports. Here's an example of how to create an `AxionEngine` object:
+This library is used to get a good interopability between Kotlin and WebAssembly (especially with Rust but I think you can port the [wasm_utils.rs](https://github.com/NOctu1412/AxionEngine/blob/master/rust_exemple/src/wasm_utils.rs) to other languages).
 
-```kotlin
-import dev.axion.AxionEngine
-import dev.axion.args.ArgumentType
-import java.io.File
 
-fun main() {
-    val scriptPath = "file.wasm"
-    val scriptBytes = File(scriptPath).readBytes()
 
-    val engine = AxionEngine(scriptBytes, listOf())
 
-    // Use the axionEngine object...
+## Features
+
+- Loading WASM modules into Kotlin
+- Calling WASM exports function with Kotlin types
+- WASM Imports for calling Kotlin from WASM
+- Support for all primitive types + structures
+- Cross platform
+
+
+## Usage/Examples
+Rust:
+
+```rust
+mod wasm_utils;
+
+use wasm_utils::*;
+
+extern "C" {
+    pub fn kotlin_print(str: *mut String);
+}
+
+#[no_mangle]
+pub unsafe fn test(x: [i64; 4]) -> f32 {
+    kotlin_print(into_mut_ptr("Hello from Rust !".to_string()));
+    x.len() as f32
 }
 ```
 
-In the above example, we load the WebAssembly binary from a file and create an `AxionEngine` object with an empty list of imports.
-
-## Calling WASM export functions using `axionEngine.callExport`
-The axionEngine.callExport method is used to call an exported function from the WebAssembly module. It takes the following parameters:
-
->`name`: The name of the exported function to call.  
->`returnTypes`: The types of returns value (you can also provide only one in a non-list).  
->`args`: The arguments to pass to the exported function.  
-
-Here's an example of calling axionEngine.callExport:  
+Kotlin:
 ```kotlin
-import dev.axion.args.ArgumentType
+class KotlinPrintImport : WasmImport(
+    "kotlin_print",
+    EnumWasmType.VOID,             //return type
+    arrayOf(EnumWasmType.STRING),  //args types
+    { axionEngine, args ->         //callback
+        val firstArgument = args[0].value as String
 
-val result = axionEngine.callExport(
-    "test", //the name of the export
-    WasmTypes.STRING, //the return type (you can also have multiples using listOf(...))
-    2.5.toWasmType(), 5.toWasmType() //the arguments to pass to the export
+        println(firstArgument)
+
+        null                        //for void functions, returning null is good
+    }
 )
 
-println(result.value)
+fun main() {
+    val wasmBin = File("rust.wasm").readBytes()
+
+    val axionEngine = AxionEngine(wasmBin,
+        KotlinPrintImport(),
+        //...  (add all your imports)
+    )
+
+    val callResult = axionEngine.callExport<FloatWasmType>  //for void functions, do not put a type
+        (
+        "test",  //function name
+        listOf(1L, 2L, 3L, 4L).toWasmType(axionEngine),
+        //...   (add all your arguments)
+        )
+
+    println(callResult.value)
+}
 ```
 
-In the above example, we call the exported function named "test" with a double argument 2.5. The ArgumentType.STRING indicates the expected return type. The result is printed to the console.  
+(see more examples in the [kotlin test directory](https://github.com/NOctu1412/AxionEngine/tree/master/src/test/kotlin) and in the [rust example](https://github.com/NOctu1412/AxionEngine/tree/master/rust_example))
 
-## Different types of types you can create
-Use the following pattern to create a type:  
-> `value`.toWasmType()
 
-## Closing the `AxionEngine` Object
-When you're done using the `AxionEngine` object, you should close it. This will free up any resources that were allocated by the WebAssembly module. Here's an example of how to close an `AxionEngine` object:
 
-```kotlin
-axionEngine.close()
-```
 
-## Creating structures
 
-### Creating the structure definition
-```kotlin
-data class TestStructure(
-    @DeclaredField
-    val name: String,
-    @DeclaredField
-    val age: Int,
-    @DeclaredField
-    val height: Float,
-    @DeclaredField
-    val weight: Double,
-    @DeclaredField
-    val isAlive: Boolean,
-    @DeclaredField
-    val favoriteLetter: Char,
-    @DeclaredField
-    val favoriteNumber: Byte,
-    @DeclaredField
-    val favoriteColor: Short,
-    @DeclaredField
-    val favoriteFood: Long,
-    @DeclaredField
-    val favoriteDrink: PointerWasmType,
-)
-```
+## Authors
 
-These are all the types you can use in a structure !
+- [@NOctu1412](https://www.github.com/NOctu1412)
 
-### Getting a pointer to the structure
-Creating a PointerWasmType from a structure is the only way to pass structures to the wasm module, and we made it super easy !  
-```kotlin
-val structure = TestStructure(
-    "Axion",
-    18,
-    ...
-)
+## Thanks to
+- [@wasmerio](https://www.github.com/wasmerio) for the [wasmer](https://github.com/wasmerio/wasmer) and [wasmer-java](https://github.com/wasmerio/wasmer-java) librairies !
 
-//By default, when you use PointerWasmType in a call, it will be auto-freed, so if you want to have the same result in the return value, it will not be possible.
-//To disable the auto-free, you can use the autoFree parameter in the allocateStructurePointer method
-val structurePointer = PointerWasmType.allocateStructurePointer(axionEngine, structure, autoFree = false)
-
-//calling the export
-val result = axionEngine.callExport("test", WasmTypes.POINTER, structurePointer) as PointerWasmType //the result is a PointerWasmType
-
-//getting the structure from the pointer
-val outputStructure = result.getThisPointerAsStructure(TestStructure::class.java)
-
-println(outputStructure.name) //Axion
-
-//manually freeing the structure
-engine.free(structurePointer.ptr, structurePointer.size)
-
-//closing the Axion Engine
-engine.close()
-```
-
-## Pointers class:
-The Pointers class is used to create and read pointers to the wasm memory.
-
-### PointerWasmType methods:
-```kotlin
-//create a pointer to a structure
-//axionEngine: the axionEngine instance of the wasm module
-//structure: the structure to create a pointer to
-//autoFree: if the pointer should be auto-freed when used in a call (true by default)
-PointerWasmType.allocateStructurePointer(engine: AxionEngine, structure: Any, autoFree: Boolean = true): PointerWasmType
-
-//create a pointer to any supported type type
-//axionEngine: the axionEngine instance of the wasm module
-//value: the value to create a pointer to
-//autoFree: if the pointer should be auto-freed when used in a call (true by default)
-//byteOrder: /!\ MODIFY ONLY IF YOU KNOW WHAT YOU ARE DOING /!\ the byte order of the value (little endian by default)
-allocatePointer(engine: AxionEngine, defaultValue: T, byteOrder: ByteOrder = ByteOrder.LITTLE_ENDIAN, autoFree: Boolean = true): PointerWasmType
-
-//get the value at the pointer address
-//offset: the offset of the value in the pointer (0 by default)
-get<T>(offset: Int = 0)
-
-//set the value at the pointer address
-//value: the value to set
-//offset: the offset of the value in the pointer (0 by default)
-write<T>(value: T, offset: Int = 0)
-
-//get the value at the given index of an array (in memory the array is a pointer, so you can use PointerWasmType as an array way)
-getArrayElement<T>(index: Int): T
-
-//set the value at the given index of an array (in memory the array is a pointer, so you can use PointerWasmType as an array way)
-writeArrayElement<T>(value: T, index: Int)
-```
+- [@beaclnd92](https://github.com/beaclnd92) for his wasmer-java [pull request](https://github.com/wasmerio/wasmer-java/pull/64)

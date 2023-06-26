@@ -60,42 +60,18 @@ fun Any.toWasmType(engine: AxionEngine, wasmType: EnumWasmType): WasmType {
     }
 }
 
-/*fun Long.toWasmType(engine: AxionEngine, wasType: EnumWasmType): WasmType {
-    return when(wasType) {
-        EnumWasmType.BYTE -> ByteWasmType(this.toByte())
-        EnumWasmType.CHAR -> CharWasmType(this.toInt().toChar())
-        EnumWasmType.BOOLEAN -> BooleanWasmType(this == 1L)
-        EnumWasmType.SHORT -> ShortWasmType(this.toShort())
-        EnumWasmType.INTEGER -> IntegerWasmType(this.toInt())
-        EnumWasmType.LONG -> LongWasmType(this)
-        EnumWasmType.FLOAT -> FloatWasmType(this.toBytes(ByteOrder.LITTLE_ENDIAN).toFloat(ByteOrder.LITTLE_ENDIAN))
-        EnumWasmType.DOUBLE -> DoubleWasmType(this.toBytes(ByteOrder.LITTLE_ENDIAN).toDouble(ByteOrder.LITTLE_ENDIAN))
-        EnumWasmType.CSTRING -> engine.let {
-            val pointer = PointerWasmType(engine, this)
-            var string = ""
-            var i = 0
-
-            while (true) {
-                val char: Char = pointer.getArrayElement(i)
-                if (char == 0.toChar()) break
-                string += char
-                i++
-            }
-
-            CStringWasmType(string)
-        }
-        EnumWasmType.STRING -> engine.let {
-            val length = it.getStringObjectLength(this)
-            val buffer = it.getStringObjectBuffer(this)
-
-            val string = it.getDefaultMemory().read(buffer.toInt(), length.toInt()).toString(Charsets.UTF_8)
-            //freeing the string//
-
-            it.free(buffer, length)
-            it.destroyStringObject(this)
-            StringWasmType(string)
-        }
-        EnumWasmType.POINTER -> return PointerWasmType(engine, this)
-        else -> throw IllegalArgumentException("Unknown argument type: $wasType")
+fun Class<*>.getWasmTypeSize(): Int {
+    return when (this) {
+        Byte::class.java, java.lang.Byte::class.java -> 1
+        Char::class.java, java.lang.Character::class.java -> 2
+        Boolean::class.java, java.lang.Boolean::class.java -> 1
+        Short::class.java, java.lang.Short::class.java -> 2
+        Int::class.java, java.lang.Integer::class.java -> 4
+        Long::class.java, java.lang.Long::class.java -> 8
+        Float::class.java, java.lang.Float::class.java -> 4
+        Double::class.java, java.lang.Double::class.java -> 8
+        String::class.java, java.lang.String::class.java -> 4 //pointer size
+        PointerWasmType::class.java -> 4 //pointer size
+        else -> throw IllegalArgumentException("Unsupported type: ${this.simpleName}")
     }
-}*/
+}
